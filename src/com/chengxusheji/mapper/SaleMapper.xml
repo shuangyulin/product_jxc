@@ -1,0 +1,51 @@
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间，为了对sql语句进行隔离，方便管理，mapper开发dao方式，使用namespace有特殊作用  
+mapper代理开发时将namespace指定为mapper接口的全限定名  
+ -->
+<mapper namespace="com.chengxusheji.mapper.SaleMapper"> 
+<!--在mapper.xml文件中配置很多的sql语句，执行每个sql语句时，封装为MappedStatement对象 
+mapper.xml以statement为单位管理sql语句  
+ -->
+	<!-- 添加销售信息记录 -->
+	<insert id="addSale" parameterType="sale">
+		insert into t_sale(productObj,userObj,price,count,saleDate,employeeObj,memo) values 
+		(#{productObj.productNo},#{userObj.user_name},#{price},#{count},#{saleDate},#{employeeObj.employeeNo},#{memo})
+	</insert>
+
+	<!-- 按照查询条件分页查询销售信息记录 -->
+	<select id="querySale" resultMap="saleMap" >
+		select t_sale.* from t_sale,t_employee,t_product,t_userInfo ${where} and t_sale.productObj = t_product.productNo and t_sale.userObj = t_userInfo.user_name and t_sale.employeeObj = t_employee.employeeNo limit #{startIndex},#{pageSize}
+	</select>
+	<resultMap id="saleMap" type="sale">
+        <id property="saleId" column="saleId" />
+        <association property="productObj" column="productObj" select="com.chengxusheji.mapper.ProductMapper.getProduct" />
+        <association property="userObj" column="userObj" select="com.chengxusheji.mapper.UserInfoMapper.getUserInfo" />
+        <association property="employeeObj" column="employeeObj" select="com.chengxusheji.mapper.EmployeeMapper.getEmployee" />
+    </resultMap>
+
+    <!-- 按照查询条件查询所有销售信息记录 -->
+	<select id="querySaleList" resultMap="saleMap" >
+		select t_sale.* from t_sale,t_employee,t_product,t_userInfo ${where} and t_sale.productObj = t_product.productNo and t_sale.userObj = t_userInfo.user_name and t_sale.employeeObj = t_employee.employeeNo
+	</select>
+
+    <!-- 按照查询条件的销售信息记录数 -->
+	<select id="querySaleCount" resultType="int">
+		select count(*) from t_sale,t_employee,t_product,t_userInfo ${where} and t_sale.productObj = t_product.productNo and t_sale.userObj = t_userInfo.user_name and t_sale.employeeObj = t_employee.employeeNo
+	</select>
+
+	<!-- 根据主键查询某个销售信息记录 -->
+	<select id="getSale" parameterType="int" resultMap="saleMap">
+		select * from t_sale where t_sale.saleId = #{saleId}
+	</select>
+
+	<!-- 更新销售信息记录 -->
+	<update id="updateSale" parameterType="sale">
+		update t_sale set productObj=#{productObj.productNo},userObj=#{userObj.user_name},price=#{price},count=#{count},saleDate=#{saleDate},employeeObj=#{employeeObj.employeeNo},memo=#{memo} where saleId = #{saleId}
+	</update>
+
+	<!-- 删除销售信息记录 -->
+	<delete id="deleteSale" parameterType="int">
+		delete from t_sale where saleId=#{saleId}
+	</delete>
+
+</mapper>

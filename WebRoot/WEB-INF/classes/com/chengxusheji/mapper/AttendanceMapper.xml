@@ -1,0 +1,49 @@
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间，为了对sql语句进行隔离，方便管理，mapper开发dao方式，使用namespace有特殊作用  
+mapper代理开发时将namespace指定为mapper接口的全限定名  
+ -->
+<mapper namespace="com.chengxusheji.mapper.AttendanceMapper"> 
+<!--在mapper.xml文件中配置很多的sql语句，执行每个sql语句时，封装为MappedStatement对象 
+mapper.xml以statement为单位管理sql语句  
+ -->
+	<!-- 添加员工出勤记录 -->
+	<insert id="addAttendance" parameterType="attendance">
+		insert into t_attendance(employeeObj,year,month,shouldComeDays,leaveDays,absenceDays) values 
+		(#{employeeObj.employeeNo},#{year},#{month},#{shouldComeDays},#{leaveDays},#{absenceDays})
+	</insert>
+
+	<!-- 按照查询条件分页查询员工出勤记录 -->
+	<select id="queryAttendance" resultMap="attendanceMap" >
+		select t_attendance.* from t_attendance,t_employee ${where} and t_attendance.employeeObj = t_employee.employeeNo limit #{startIndex},#{pageSize}
+	</select>
+	<resultMap id="attendanceMap" type="attendance">
+        <id property="attendanceId" column="attendanceId" />
+        <association property="employeeObj" column="employeeObj" select="com.chengxusheji.mapper.EmployeeMapper.getEmployee" />
+    </resultMap>
+
+    <!-- 按照查询条件查询所有员工出勤记录 -->
+	<select id="queryAttendanceList" resultMap="attendanceMap" >
+		select t_attendance.* from t_attendance,t_employee ${where} and t_attendance.employeeObj = t_employee.employeeNo
+	</select>
+
+    <!-- 按照查询条件的员工出勤记录数 -->
+	<select id="queryAttendanceCount" resultType="int">
+		select count(*) from t_attendance,t_employee ${where} and t_attendance.employeeObj = t_employee.employeeNo
+	</select>
+
+	<!-- 根据主键查询某个员工出勤记录 -->
+	<select id="getAttendance" parameterType="int" resultMap="attendanceMap">
+		select * from t_attendance where t_attendance.attendanceId = #{attendanceId}
+	</select>
+
+	<!-- 更新员工出勤记录 -->
+	<update id="updateAttendance" parameterType="attendance">
+		update t_attendance set employeeObj=#{employeeObj.employeeNo},year=#{year},month=#{month},shouldComeDays=#{shouldComeDays},leaveDays=#{leaveDays},absenceDays=#{absenceDays} where attendanceId = #{attendanceId}
+	</update>
+
+	<!-- 删除员工出勤记录 -->
+	<delete id="deleteAttendance" parameterType="int">
+		delete from t_attendance where attendanceId=#{attendanceId}
+	</delete>
+
+</mapper>

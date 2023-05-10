@@ -1,0 +1,51 @@
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间，为了对sql语句进行隔离，方便管理，mapper开发dao方式，使用namespace有特殊作用  
+mapper代理开发时将namespace指定为mapper接口的全限定名  
+ -->
+<mapper namespace="com.chengxusheji.mapper.PurchaseMapper"> 
+<!--在mapper.xml文件中配置很多的sql语句，执行每个sql语句时，封装为MappedStatement对象 
+mapper.xml以statement为单位管理sql语句  
+ -->
+	<!-- 添加进货信息记录 -->
+	<insert id="addPurchase" parameterType="purchase">
+		insert into t_purchase(productObj,supplierObj,price,count,purchaseDate,employeeObj,memo) values 
+		(#{productObj.productNo},#{supplierObj.supplierId},#{price},#{count},#{purchaseDate},#{employeeObj.employeeNo},#{memo})
+	</insert>
+
+	<!-- 按照查询条件分页查询进货信息记录 -->
+	<select id="queryPurchase" resultMap="purchaseMap" >
+		select t_purchase.* from t_purchase,t_employee,t_product,t_supplier ${where} and t_purchase.productObj = t_product.productNo and t_purchase.supplierObj = t_supplier.supplierId and t_purchase.employeeObj = t_employee.employeeNo limit #{startIndex},#{pageSize}
+	</select>
+	<resultMap id="purchaseMap" type="purchase">
+        <id property="purchaseId" column="purchaseId" />
+        <association property="productObj" column="productObj" select="com.chengxusheji.mapper.ProductMapper.getProduct" />
+        <association property="supplierObj" column="supplierObj" select="com.chengxusheji.mapper.SupplierMapper.getSupplier" />
+        <association property="employeeObj" column="employeeObj" select="com.chengxusheji.mapper.EmployeeMapper.getEmployee" />
+    </resultMap>
+
+    <!-- 按照查询条件查询所有进货信息记录 -->
+	<select id="queryPurchaseList" resultMap="purchaseMap" >
+		select t_purchase.* from t_purchase,t_employee,t_product,t_supplier ${where} and t_purchase.productObj = t_product.productNo and t_purchase.supplierObj = t_supplier.supplierId and t_purchase.employeeObj = t_employee.employeeNo
+	</select>
+
+    <!-- 按照查询条件的进货信息记录数 -->
+	<select id="queryPurchaseCount" resultType="int">
+		select count(*) from t_purchase,t_employee,t_product,t_supplier ${where} and t_purchase.productObj = t_product.productNo and t_purchase.supplierObj = t_supplier.supplierId and t_purchase.employeeObj = t_employee.employeeNo
+	</select>
+
+	<!-- 根据主键查询某个进货信息记录 -->
+	<select id="getPurchase" parameterType="int" resultMap="purchaseMap">
+		select * from t_purchase where t_purchase.purchaseId = #{purchaseId}
+	</select>
+
+	<!-- 更新进货信息记录 -->
+	<update id="updatePurchase" parameterType="purchase">
+		update t_purchase set productObj=#{productObj.productNo},supplierObj=#{supplierObj.supplierId},price=#{price},count=#{count},purchaseDate=#{purchaseDate},employeeObj=#{employeeObj.employeeNo},memo=#{memo} where purchaseId = #{purchaseId}
+	</update>
+
+	<!-- 删除进货信息记录 -->
+	<delete id="deletePurchase" parameterType="int">
+		delete from t_purchase where purchaseId=#{purchaseId}
+	</delete>
+
+</mapper>
